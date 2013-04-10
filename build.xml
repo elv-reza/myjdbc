@@ -1,0 +1,93 @@
+<project name="dbcore" default="compile" basedir=".">
+	<description>
+		Build file of dbcore
+	</description>
+
+	<!-- set global properties for this build -->
+	<property name="src" location="src/com/snapeet"/>
+	<property name="test.src" location="src/test/com/snapeet"/>
+	<property name="common" location="${src}/common"/>
+	<property name="dbcore" location="${src}/dbcore"/>
+	<property name="examples" location="${src}/examples"/>
+	<property name="build" location="build"/>
+	<property name="dist" location="dist"/>
+	<property name="build.classes" location="build/classes"/>
+	<property name="test.build" location="build/test"/>
+	<property name="test.conf" location="conf/test"/>
+	<property name="examples-compile" location="${build.classes}/examples"/>
+	<property name="dist" location="dist"/>
+	<property name="3rdparty" location="3rdparty"/>
+
+	<property environment="env"/>
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build.classes}"/>
+		<mkdir dir="${test.build}"/>
+		<mkdir dir="${dist}"/>
+	</target>
+
+	<path id="dbcore-lib.classpath">
+		<pathelement location="${build.classes}"/>
+		<fileset dir="${3rdparty}" includes="*.jar"/>
+		<pathelement location="${dist}/lib/dbcore.jar"/>
+	</path>
+
+	<path id="dbcore-lib.test.classpath">
+		<pathelement location="${test.build}"/>
+		<pathelement location="${test.conf}" />
+		<path refid="dbcore-lib.classpath"/>
+	</path>
+
+	<target name="compile" depends="init" description="compile the source" >
+		<!-- Compile the java code from ${src} into ${compile} -->
+		<javac srcdir="${common}:${dbcore}" destdir="${build.classes}">
+			<classpath refid="dbcore-lib.classpath"/>
+		</javac>
+		<copy todir="${build.classes}" flatten="true">
+			<resources>
+				<file file="conf/log4j.properties"/>
+			</resources>
+		</copy>
+		<jar destfile="${dist}/dbcore.jar" basedir="${build.classes}"/>
+	</target>
+
+	<target name="compile-test" depends="init,compile">
+		<javac srcdir="${test.src}" destdir="${test.build}">
+			<classpath refid="dbcore-lib.test.classpath"/>
+		</javac>
+	</target>
+    
+	<target name="dbcore" depends="compile" description="build the source" >
+		<!-- Compile and build server JAR file  -->
+		<jar destfile="build/dbcore.jar">
+			<classes dir="build/classes"/>
+		</jar>
+	</target>
+
+	<target name="examples" depends="compile" description="build the source" >
+		<!-- Compile and build examples JAR file  -->
+		<javac srcdir="${common}:${dbcore}:${examples}" destdir="${build.classes}">
+			<classpath refid="dbcore-lib.classpath"/>
+		</javac>
+		<jar destfile="${dist}/examples.jar" basedir="build/classes"/>
+	</target>
+
+	<target name="test" depends="compile-test" >
+		<junit printsummary="yes" showoutput="true" >
+			<classpath refid="dbcore-lib.test.classpath" />
+			<batchtest>
+				<fileset dir="${test.build}" includes="**/*Test.class" />
+			</batchtest>
+			<formatter type="plain" usefile="false"/>
+		</junit>
+	</target>
+
+	<target name="clean" description="clean up" >
+		<!-- Delete the ${compile} directory tree -->
+		<delete dir="${build}"/>
+		<delete dir="${dist}"/>
+	</target>
+</project>
