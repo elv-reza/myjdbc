@@ -2,7 +2,7 @@ dbcore
 ======
 
 - dbcore is a simple framework to access database and map tables to JAVA objects.
-- 
+ 
 - dbcore is a simple framework based on JDBC to execute queries without dealing the details of JDBC.
   You can have your application access to DB with the following easy steps:
 
